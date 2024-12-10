@@ -1,3 +1,4 @@
+require('dotenv').config()
 const mongoose = require("mongoose");
 
 const connectionString = process.env.CONNECTION_STRING;
