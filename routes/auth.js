@@ -8,7 +8,6 @@ const jwt = require("jsonwebtoken");
 
 /* Inscription */
 router.post("/signup", async (req, res) => {
-  console.log(req.body);
   try {
     /* Verification des champs */
     if (
@@ -73,6 +72,14 @@ router.post("/signup", async (req, res) => {
 
 /* Connection */
 router.post("/signin", async (req, res, next) => {
+  try {
+    /* Verification des champs */
+    if (!checkBody(req.body, ["email", "password"])) {
+      res.json({ result: false, error: "Tous les champs doivent être saisis" });
+      return;
+    }
+router.post("/signin", async (req, res, next) => {
+  console.log(req.body);
   try {
     /* Verification des champs */
     if (!checkBody(req.body, ["email", "password"])) {
