@@ -8,6 +8,7 @@ const cors = require("cors");
 const authRouter = require("./routes/auth");
 var indexRouter = require("./routes/index");
 var usersRouter = require("./routes/users");
+var customersRouter = require("./routes/customers");
 
 var app = express();
 app.use(cors({ origin: "*" }));
@@ -21,5 +22,6 @@ app.use(express.static(path.join(__dirname, "public")));
 app.use("/", indexRouter);
 app.use("/users", usersRouter);
 app.use("/auth", authRouter);
+app.use("/customers", customersRouter);
 
 module.exports = app;
