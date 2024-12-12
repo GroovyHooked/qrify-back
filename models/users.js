@@ -7,8 +7,8 @@ const userSchema = mongoose.Schema({
   company: String,
   password: String,
   token: String,
-  userId: String,
   logoPath: String,
+  // ObjectId
 });
 
 const User = mongoose.model("users", userSchema);
