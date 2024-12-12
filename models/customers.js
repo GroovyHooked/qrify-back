@@ -1,11 +1,11 @@
 const mongoose = require("mongoose");
 
 const customerSchema = mongoose.Schema({
-  firstName: String,
-  lastName: String,
+  firstname: String,
+  lastname: String,
   email: String,
   phoneNumber: String,
-  customerId: String,
+  // customerId: String,
   userId: String,
 });
 
