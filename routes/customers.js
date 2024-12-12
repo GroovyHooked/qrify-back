@@ -67,4 +67,17 @@ router.post("/new", async (req, res) => {
   }
 });
 
+router.get("/list", (req, res) => {
+  try {
+    Customer.find().then((data) => {
+      console.log(data);
+      res.json({ result: true, customers: data });
+    });
+  } catch (error) {
+    res.status(500).json({
+      error:
+        "Un problème est survenu lors la récupération de la liste des clients",
+    });
+  }
+});
 module.exports = router;
