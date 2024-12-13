@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const Card = require("../models/cards");
+const User = require("../models/users")
 const { checkBody } = require("../modules/checkBody");
 const uid2 = require("uid2");
 const QRCode = require('qrcode')
@@ -16,11 +17,15 @@ router.post("/newcard", async function (req, res, next) {
       });
     }
 
-    const { totalValue, recipient, message } = req.body;
+    const { totalValue, recipient, message, customerId, merchantMail } = req.body;
 
     const cardId = uid2(32);
 
     const date = new Date();
+
+    const merchant = await User.findOne({ email: merchantMail })
+    console.log({ merchant });
+
 
     QRCode.toFile(`./cards/${cardId}.png`, `http://localhost:3000/${cardId}.png`, {
       color: {
@@ -39,6 +44,8 @@ router.post("/newcard", async function (req, res, next) {
       recipient,
       message,
       cardId,
+      customerId,
+      userId: merchant._id
     });
 
     const savedCard = await newCard.save();
