@@ -3,6 +3,7 @@ var express = require("express");
 var path = require("path");
 var cookieParser = require("cookie-parser");
 var logger = require("morgan");
+const cors = require('cors')
 
 const authRouter = require("./routes/auth");
 var indexRouter = require("./routes/index");
@@ -23,6 +24,6 @@ app.use("/", indexRouter);
 app.use("/users", usersRouter);
 app.use("/auth", authRouter);
 app.use("/customers", customersRouter);
-app.use("/auth", cardRouter);
+app.use("/card", cardRouter);
 
 module.exports = app;

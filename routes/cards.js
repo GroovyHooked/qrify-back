@@ -3,39 +3,37 @@ const router = express.Router();
 const Card = require("../models/cards");
 const { checkBody } = require("../modules/checkBody");
 const uid2 = require("uid2");
+const QRCode = require('qrcode')
+const path = require('path');
 
-router.post("/card", async function (req, res, next) {
+
+router.post("/newcard", async function (req, res, next) {
   try {
-    if (!checkBody(req.body, ["recipient", "totalValue"])) {
+    if (!checkBody(req.body, ["recipient", "totalValue", "message"])) {
       return res.status(400).json({
         result: false,
         error: "Tous les champs doivent être saisis",
       });
     }
 
-    const { path, totalValue, recipient, message } = req.body;
+    const { totalValue, recipient, message } = req.body;
 
     const cardId = uid2(32);
 
-    // const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-
     const date = new Date();
-    // const options = {
-    //   timeZone: timeZone,
-    //   year: "numeric",
-    //   month: "2-digit",
-    //   day: "2-digit",
-    //   hour: "2-digit",
-    //   minute: "2-digit",
-    //   second: "2-digit",
-    //   //   weekday: "long",
-    // };
-    // const formattedDate = new Intl.DateTimeFormat("fr-FR", options).format(
-    //   date
-    // );
+
+    QRCode.toFile(`./cards/${cardId}.png`, `http://localhost:3000/${cardId}.png`, {
+      color: {
+        dark: '#d4a373',  // Blue dots
+        light: '#bde0fe' // Transparent background
+      }
+    }, function (err) {
+      if (err) throw err
+    })
+
 
     const newCard = new Card({
-      path,
+      path: `./cards/${cardId}.png`,
       totalValue,
       date: date,
       recipient,
@@ -66,3 +64,28 @@ router.post("/card", async function (req, res, next) {
 });
 
 module.exports = router;
+
+// router.get('/download', (req, res) => {
+//   const filePath = path.join(__dirname, 'files', 'example.pdf'); // Chemin du fichier
+//   res.download(filePath); // Télécharge le fichier
+// });
+
+// const filePath = path.join(__dirname, '../cards', `./${cardId}.png`);
+// res.download(filePath); 
+
+// const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+
+
+// const options = {
+//   timeZone: timeZone,
+//   year: "numeric",
+//   month: "2-digit",
+//   day: "2-digit",
+//   hour: "2-digit",
+//   minute: "2-digit",
+//   second: "2-digit",
+//   //   weekday: "long",
+// };
+// const formattedDate = new Intl.DateTimeFormat("fr-FR", options).format(
+//   date
+// );
