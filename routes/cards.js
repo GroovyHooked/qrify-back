@@ -6,6 +6,8 @@ const { checkBody } = require("../modules/checkBody");
 const uid2 = require("uid2");
 const QRCode = require('qrcode')
 const path = require('path');
+const Customer = require("../models/customers");
+const BASE_URL = " http://localhost:3001"
 
 
 router.post("/newcard", async function (req, res, next) {
@@ -27,11 +29,11 @@ router.post("/newcard", async function (req, res, next) {
     console.log({ merchant });
 
 
-    QRCode.toFile(`./cards/${cardId}.png`, `http://localhost:3000/${cardId}.png`, {
-      color: {
-        dark: '#d4a373',  // Blue dots
-        light: '#bde0fe' // Transparent background
-      }
+    QRCode.toFile(`./cards/${cardId}.png`, `/displaycard/${cardId}`, {
+      // color: {
+      //   dark: '#d4a373',  // Blue dots
+      //   light: '#bde0fe' // Transparent background
+      // }
     }, function (err) {
       if (err) throw err
     })
@@ -70,15 +72,61 @@ router.post("/newcard", async function (req, res, next) {
   }
 });
 
+// Envoi d'un code QR au front sous forme de fichier
+router.get('/download/:cardId', async (req, res) => {
+  try {
+    const { cardId } = req.params;
+
+    const card = await Card.findOne({ cardId });
+
+    if (!card) {
+      return res.status(404).json({ error: "Carte non trouvée" });
+    }
+
+    const filePath = path.join(__dirname, '../cards', `${cardId}.png`);
+
+    res.download(filePath, `card_${cardId}.png`, (err) => {
+      if (err) {
+        console.error("Erreur lors du téléchargement du fichier :", err);
+        return res.status(500).json({ error: "Erreur lors du téléchargement du fichier" });
+      }
+    });
+  } catch (error) {
+    console.error("Erreur lors de la récupération de la carte :", error);
+    res.status(500).json({ error: "Une erreur est survenue lors de la récupération de la carte" });
+  }
+});
+
+
+// Envoi des données (enregistrées en bdd) d'un code qr
+router.get('/datacard/:cardId', async (req, res) => {
+  try {
+    const { cardId } = req.params;
+
+    const cardData = await Card.findOne({ cardId });
+
+    if (!cardData) {
+      return res.status(404).json({ error: "Carte non trouvée" });
+    }
+
+    const customerId = cardData.customerId;
+
+    const customer = await Customer.findOne({ _id: customerId });
+
+    if (!customer) {
+      return res.status(404).json({ error: "Client non trouvé" });
+    }
+
+    res.json({ cardData, customer });
+  } catch (error) {
+    console.error("Erreur lors de la récupération des données de la carte :", error);
+    res.status(500).json({ error: "Une erreur est survenue lors de la récupération des données de la carte" });
+  }
+});
+
+
 module.exports = router;
 
-// router.get('/download', (req, res) => {
-//   const filePath = path.join(__dirname, 'files', 'example.pdf'); // Chemin du fichier
-//   res.download(filePath); // Télécharge le fichier
-// });
-
-// const filePath = path.join(__dirname, '../cards', `./${cardId}.png`);
-// res.download(filePath); 
 
 // const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
