@@ -10,6 +10,7 @@ var indexRouter = require("./routes/index");
 var usersRouter = require("./routes/users");
 var customersRouter = require("./routes/customers");
 var cardRouter = require("./routes/cards");
+var emailRouter = require("./routes/emailService");
 
 var app = express();
 app.use(cors());
@@ -25,5 +26,6 @@ app.use("/users", usersRouter);
 app.use("/auth", authRouter);
 app.use("/customers", customersRouter);
 app.use("/card", cardRouter);
+app.use("/email", emailRouter);
 
 module.exports = app;
