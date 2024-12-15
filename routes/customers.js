@@ -45,7 +45,7 @@ router.post("/new", async (req, res) => {
 
         /* Si l'inscription du client a bien eu lieu en base de données on renvoie le document fraichement enregistré sinon envoi d'un message d'erreur */
         if (savedCustomer) {
-          res.json({ result: true, savedCustomer });
+          res.json({ result: true, customer: savedCustomer });
         } else {
           res.json({
             result: false,
