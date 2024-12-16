@@ -1,7 +1,9 @@
+require('dotenv').config()
 const express = require("express");
 const router = express.Router();
 const nodemailer = require('nodemailer')
 const path = require('path'); 
+
 
 router.post('/sendmail', async (req, res) => {
     const { to, subject, text, cardId } = req.body;
@@ -14,8 +16,8 @@ router.post('/sendmail', async (req, res) => {
             port: 587,
             secure: false,
             auth: {
-                user: 'dafrenchie2002@yahoo.fr',
-                pass: 'dppmwnoenmqgzrse',
+                user: process.env.YAHOO_EMAIL,
+                pass: process.env.YAHOO_PASSWORD,
             },
         });
 

@@ -1,4 +1,4 @@
-authtoken: 1lVKfJOJeQHBxLtfsuwHWUEETlm_3WrFUZ8YENsK77JRipk6q
+authtoken: ${NGROK_TOKEN}
 version: 2
 
 tunnels:
@@ -8,3 +8,5 @@ tunnels:
   app2:
     addr: 3001
     proto: http
+
+# ngrok start --all --config=ngrok.yml
