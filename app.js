@@ -3,12 +3,14 @@ var express = require("express");
 var path = require("path");
 var cookieParser = require("cookie-parser");
 var logger = require("morgan");
+const cors = require("cors");
 
 const authRouter = require("./routes/auth");
 var indexRouter = require("./routes/index");
 var usersRouter = require("./routes/users");
 var customersRouter = require("./routes/customers");
 var cardRouter = require("./routes/cards");
+var emailRouter = require("./routes/emailService");
 const cors = require("cors");
 
 var app = express();
@@ -24,6 +26,7 @@ app.use("/", indexRouter);
 app.use("/users", usersRouter);
 app.use("/auth", authRouter);
 app.use("/customers", customersRouter);
-app.use("/auth", cardRouter);
+app.use("/card", cardRouter);
+app.use("/email", emailRouter);
 
 module.exports = app;

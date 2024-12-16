@@ -6,7 +6,6 @@ const User = require("../models/users");
 
 /* enregistrement nouveau client */
 router.post("/new", async (req, res) => {
-  console.log("DEBUG", req.body);
   try {
     /* Verification des champs */
     if (
@@ -23,14 +22,11 @@ router.post("/new", async (req, res) => {
     const customer = await Customer.findOne({ email });
     console.log({ customer });
 
-    /* Si l'utilisateur existe déjà */
+    /* Si l'utilisateur existe déjà on le renvoie */
     if (customer) {
       console.log("if customer");
+      res.json({ result: true, customer });
 
-      res.json({
-        result: false,
-        error: "Le client existe déjà en base de données",
-      });
     } else {
       console.log("else");
       // récupérer l'objectId du commercant sur la back-end
@@ -44,13 +40,12 @@ router.post("/new", async (req, res) => {
         });
 
         // /* Ajout en base de données */
-
         const savedCustomer = await newCustomer.save();
         console.log({ savedCustomer });
 
-        /* Si l'inscription du client a bien eu lieu en base de données on renvoie le token sinon envoi d'un message d'erreur */
+        /* Si l'inscription du client a bien eu lieu en base de données on renvoie le document fraichement enregistré sinon envoi d'un message d'erreur */
         if (savedCustomer) {
-          res.json({ result: true, message: "Nouveau client enregistré" });
+          res.json({ result: true, customer: savedCustomer });
         } else {
           res.json({
             result: false,

@@ -9,6 +9,7 @@ const cardSchema = mongoose.Schema({
   date: Date,
   recipient: String,
   remainingValue: Number,
+  message: String
 });
 
 const Card = mongoose.model("cards", cardSchema);

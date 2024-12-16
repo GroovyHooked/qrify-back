@@ -1,0 +1,12 @@
+authtoken: ${NGROK_TOKEN}
+version: 2
+
+tunnels:
+  app1:
+    addr: 3000
+    proto: http
+  app2:
+    addr: 3001
+    proto: http
+
+# ngrok start --all --config=ngrok.yml
