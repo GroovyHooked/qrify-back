@@ -75,4 +75,38 @@ router.get("/list", (req, res) => {
     });
   }
 });
+
+router.get("/list", (req, res) => {
+  try {
+    Customer.find().then((data) => {
+      console.log(data);
+      res.json({ result: true, customers: data });
+    });
+  } catch (error) {
+    res.status(500).json({
+      error:
+        "Un problème est survenu lors la récupération de la liste des clients",
+    });
+  }
+});
+
+router.post("/onecustomer", (req, res) => {
+  console.log("debug=>", req.body);
+
+  try {
+    Customer.findOne({ firstname: req.body.firstname }).then((data) => {
+      console.log({ data });
+      if (data) {
+        res.json({ result: true, customers: data });
+      } else {
+        res.json({ result: false, message: "Le client n'existe pas" });
+      }
+    });
+  } catch (error) {
+    res.status(500).json({
+      error: "Un problème est survenu lors de la requête en base de données",
+    });
+  }
+});
+
 module.exports = router;
