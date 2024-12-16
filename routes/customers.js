@@ -101,12 +101,15 @@ router.post("/onecustomer", (req, res) => {
   try {
     Customer.findOne({ firstname: req.body.firstname }).then((data) => {
       console.log({ data });
-      res.json({ result: true, customers: data });
+      if (data) {
+        res.json({ result: true, customers: data });
+      } else {
+        res.json({ result: false, message: "Le client n'existe pas" });
+      }
     });
   } catch (error) {
     res.status(500).json({
-      error:
-        "Un problème est survenu lors la récupération de la liste des clients",
+      error: "Un problème est survenu lors de la requête en base de données",
     });
   }
 });
