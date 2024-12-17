@@ -5,12 +5,16 @@ const Card = require("../models/cards");
 router.put("/updateValue/:cardId", (req, res) => {
   try {
     const { cardId } = req.params;
-    const { totalValue } = req.body;
-    Card.updateOne({ cardId }, { totalValue }).then((data) => {
-      if (!totalValue) {
+    Card.updateOne({ cardId }, { $set: { totalValue: 0 } }).then((data) => {
+      if (!data) {
         return res.status(404).json({ error: "Carte non trouvée" });
       }
-      res.json({ result: true, totalValue: data.totalValue });
+
+      if (data.modifiedCount === 0) {
+        res.json({ result: false, error: "La carte est déjà utilisé" });
+      } else {
+        res.json({ result: true });
+      }
     });
   } catch (error) {
     console.error("Erreur  :", error);
