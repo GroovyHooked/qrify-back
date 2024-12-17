@@ -28,7 +28,6 @@ router.post("/new", async (req, res) => {
       res.json({ result: true, customer });
 
     } else {
-      console.log("else");
       // récupérer l'objectId du commercant sur la back-end
       User.findOne({ email: merchantMail }).then(async (data) => {
         const newCustomer = new Customer({

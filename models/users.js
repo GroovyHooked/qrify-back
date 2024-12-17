@@ -8,6 +8,7 @@ const userSchema = mongoose.Schema({
   password: String,
   token: String,
   logoPath: String,
+  avatarPath: String,
   // ObjectId
 });
 

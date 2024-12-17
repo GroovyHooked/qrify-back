@@ -43,6 +43,7 @@ router.post("/newcard", async function (req, res, next) {
     const newCard = new Card({
       path: `./cards/${cardId}.png`,
       totalValue,
+      remainingValue: totalValue,
       date: date,
       recipient,
       message,
@@ -78,20 +79,27 @@ router.get('/download/:cardId', async (req, res) => {
   try {
     const { cardId } = req.params;
 
-    const card = await Card.findOne({ cardId });
+    if (cardId) {
+      const card = await Card.findOne({ cardId });
 
-    if (!card) {
-      return res.status(404).json({ error: "Carte non trouvée" });
+      if (!card) {
+        return res.status(404).json({ error: "Carte non trouvée" });
+      }
+
+      const filePath = path.join(__dirname, '../cards', `${cardId}.png`);
+
+
+      res.download(filePath, `card_${cardId}.png`, (err) => {
+        if (err) {
+          console.error("Erreur lors du téléchargement du fichier :", err);
+          return res.status(500).json({ error: "Erreur lors du téléchargement du fichier" });
+        }
+      });
+
+    } else {
+      res.json({ result: false })
     }
 
-    const filePath = path.join(__dirname, '../cards', `${cardId}.png`);
-
-    res.download(filePath, `card_${cardId}.png`, (err) => {
-      if (err) {
-        console.error("Erreur lors du téléchargement du fichier :", err);
-        return res.status(500).json({ error: "Erreur lors du téléchargement du fichier" });
-      }
-    });
   } catch (error) {
     console.error("Erreur lors de la récupération de la carte :", error);
     res.status(500).json({ error: "Une erreur est survenue lors de la récupération de la carte" });
