@@ -11,7 +11,6 @@ var usersRouter = require("./routes/users");
 var customersRouter = require("./routes/customers");
 var cardRouter = require("./routes/cards");
 var emailRouter = require("./routes/emailService");
-const cors = require("cors");
 
 var app = express();
 app.use(cors());
