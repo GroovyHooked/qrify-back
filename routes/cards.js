@@ -7,7 +7,9 @@ const uid2 = require("uid2");
 const QRCode = require("qrcode");
 const path = require("path");
 const Customer = require("../models/customers");
-const BASE_URL = " http://localhost:3001";
+const cloudinary = require('cloudinary').v2;
+const fs = require('fs');
+const BASE_URL = " http://localhost:3001"
 // const BASE_URL = "https://d50e-2a01-cb16-2038-69d8-80fe-8437-bd0d-9383.ngrok-free.app"
 
 router.post("/newcard", async function (req, res, next) {
@@ -29,22 +31,25 @@ router.post("/newcard", async function (req, res, next) {
     const merchant = await User.findOne({ email: merchantMail });
     console.log({ merchant });
 
-    QRCode.toFile(
-      `./cards/${cardId}.png`,
-      `/displaycard/${cardId}`,
-      {
-        // color: {
-        //   dark: '#d4a373',  // Blue dots
-        //   light: '#bde0fe' // Transparent background
-        // }
-      },
-      function (err) {
-        if (err) throw err;
-      }
-    );
+    const cardPath = `./cards/${cardId}.png`
+
+    QRCode.toFile(cardPath, `/displaycard/${cardId}`, {
+      // color: {
+      //   dark: '#d4a373',  // Blue dots
+      //   light: '#bde0fe' // Transparent background
+      // }
+    }, function (err) {
+      if (err) throw err
+    })
+
+    const resultCloudinary = await cloudinary.uploader.upload(cardPath).catch(err => {
+      res.json({ result: false, error: err });
+    });
+
+    fs.unlinkSync(cardPath);
 
     const newCard = new Card({
-      path: `./cards/${cardId}.png`,
+      path: resultCloudinary.secure_url,
       totalValue,
       remainingValue: totalValue,
       date: date,
@@ -61,6 +66,7 @@ router.post("/newcard", async function (req, res, next) {
       res.json({
         result: true,
         card: savedCard,
+        url: resultCloudinary.secure_url
       });
     } else {
       res.status(500).json({
@@ -100,16 +106,8 @@ router.get("/download/:cardId", async (req, res) => {
         return res.status(404).json({ error: "Carte non trouvée" });
       }
 
-      const filePath = path.join(__dirname, "../cards", `${cardId}.png`);
+      res.json({ result: true, cardPath: card.path })
 
-      res.download(filePath, `card_${cardId}.png`, (err) => {
-        if (err) {
-          console.error("Erreur lors du téléchargement du fichier :", err);
-          return res
-            .status(500)
-            .json({ error: "Erreur lors du téléchargement du fichier" });
-        }
-      });
     } else {
       res.json({ result: false });
     }

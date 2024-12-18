@@ -2,13 +2,20 @@ require('dotenv').config()
 const express = require("express");
 const router = express.Router();
 const nodemailer = require('nodemailer')
-const path = require('path'); 
+const path = require('path');
+const Card = require('../models/cards')
 
 
 router.post('/sendmail', async (req, res) => {
     const { to, subject, text, cardId } = req.body;
 
     try {
+
+        const card = await Card.findOne({ cardId })
+
+        if (!card) {
+            return res.status(404).json({ message: "Carte non trouvé en bdd" });
+        }
 
         // Configure le transporteur SMTP
         const transporter = nodemailer.createTransport({
@@ -28,9 +35,8 @@ router.post('/sendmail', async (req, res) => {
             subject,
             text,
             attachments: [
-                {   // file on disk as an attachment
-                    filename: `${cardId}.png`,
-                    path: path.join(__dirname, `../cards/${cardId}.png`)
+                {
+                    path: card.path
                 },
             ]
         };
