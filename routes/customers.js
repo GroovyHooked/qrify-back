@@ -93,7 +93,7 @@ router.post("/onecustomer", (req, res) => {
   console.log("debug=>", req.body);
 
   try {
-    Customer.findOne({ firstname: req.body.firstname }).then((data) => {
+    Customer.findOne({ lastname: req.body.lastname }).then((data) => {
       console.log({ data });
       if (data) {
         res.json({ result: true, customers: data });
