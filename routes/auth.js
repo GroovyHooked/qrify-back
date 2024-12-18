@@ -48,11 +48,10 @@ router.post("/signup", async (req, res) => {
         password: hash,
         token,
         userId,
-        avatarPath: '/avatars/avatar1.svg'
+        avatarPath: "/avatars/avatar1.svg",
       });
 
       const savedUser = await newUser.save();
-
 
       /* Si l'inscription a bien eu lieu en base de données on renvoie le token sinon envoi d'un message d'erreur */
       if (savedUser) {
@@ -62,7 +61,7 @@ router.post("/signup", async (req, res) => {
           email: savedUser.email,
           firstname: savedUser.firstname,
           lastname: savedUser.lastname,
-          avatarPath: savedUser.avatarPath
+          avatarPath: savedUser.avatarPath,
         });
       } else {
         res.json({
@@ -112,7 +111,7 @@ router.post("/signin", async (req, res, next) => {
       email: user.email,
       firstname: user.firstname,
       lastname: user.lastname,
-      avatarPath: user.avatarPath
+      avatarPath: user.avatarPath,
     });
   } catch (error) {
     res.status(500).json({ error: "La connexion a échoué" });
