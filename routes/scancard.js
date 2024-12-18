@@ -5,7 +5,7 @@ const Card = require("../models/cards");
 router.put("/updateValue/:cardId", (req, res) => {
   try {
     const { cardId } = req.params;
-    Card.updateOne({ cardId }, { $set: { totalValue: 0 } }).then((data) => {
+    Card.updateOne({ cardId }, { $set: { remainingValue: 0 } }).then((data) => {
       if (!data) {
         return res.status(404).json({ error: "Carte non trouvée" });
       }
