@@ -41,6 +41,7 @@ router.post("/newcard", async function (req, res, next) {
     }, function (err) {
       if (err) throw err
     })
+  
 
     const resultCloudinary = await cloudinary.uploader.upload(cardPath).catch(err => {
       res.json({ result: false, error: err });
