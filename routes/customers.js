@@ -75,12 +75,21 @@ router.get("/list", (req, res) => {
   }
 });
 
-router.get("/list", (req, res) => {
+router.post("/list", async (req, res) => {
+
+  const { token } = req.body
+
   try {
-    Customer.find().then((data) => {
-      console.log(data);
-      res.json({ result: true, customers: data });
-    });
+    const user = await User.findOne({ token: token });
+
+    if (!user) {
+      return { result: false, message: "Utilisateur introuvable pour ce token." };
+    }
+
+    const customers = await Customer.find({ userId: user._id });
+
+    res.json({ result: true, customers });
+
   } catch (error) {
     res.status(500).json({
       error:
@@ -89,18 +98,28 @@ router.get("/list", (req, res) => {
   }
 });
 
-router.post("/onecustomer", (req, res) => {
-  console.log("debug=>", req.body);
+router.post("/onecustomer", async (req, res) => {
+
+  const { lastname, token } = req.body
+  console.log({ lastname, token });
+
 
   try {
-    Customer.findOne({ lastname: req.body.lastname }).then((data) => {
-      console.log({ data });
-      if (data) {
-        res.json({ result: true, customers: data });
-      } else {
-        res.json({ result: false, message: "Le client n'existe pas" });
-      }
-    });
+
+    const user = await User.findOne({ token: token });
+
+    if (!user) {
+      return { result: false, message: "Utilisateur introuvable pour ce token." };
+    }
+
+    const customers = await Customer.findOne({ userId: user._id, firstname: lastname });
+
+    if (customers) {
+      res.json({ result: true, customers });
+    } else {
+      res.json({ result: false, message: "Le client n'existe pas" });
+    }
+
   } catch (error) {
     res.status(500).json({
       error: "Un problème est survenu lors de la requête en base de données",
