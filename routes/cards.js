@@ -84,8 +84,13 @@ router.post("/newcard", async function (req, res, next) {
   }
 });
 
-router.get("/allcards", async (req, res, next) => {
-  const cards = await Card.find()
+router.post("/allcards", async (req, res, next) => {
+
+  const { token } = req.body
+
+  const user = await User.findOne({ token: token });
+
+  const cards = await Card.find({ userId: user._id })
     .populate({
       path: "customerId", // Champ référencé dans Card
       model: "customers", // Modèle Mongoose associé
