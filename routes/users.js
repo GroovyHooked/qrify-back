@@ -49,9 +49,31 @@ router.put('/avatarupdate/', async (req, res) => {
     res.json({ result: true });
 
   } catch (e) {
-    console.log('une erreur est survenue lors de la mise à jour', e);
+    console.log("une erreur est survenue lors de la mise à jour de l'avatar", e);
   }
 
+})
+
+
+router.put('/updateemail', async (req, res) => {
+  const { email, token } = req.body
+
+  try {
+    const result = await User.findOneAndUpdate(
+      { token: token },
+      { email },
+      { new: true }
+    );
+
+    if (!result) {
+      return res.json({ result: false });
+    }
+
+    res.json({ result: true });
+
+  } catch (e) {
+    console.log("une erreur est survenue lors de la mise à jour de l'email", e);
+  }
 })
 
 

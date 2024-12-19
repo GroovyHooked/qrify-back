@@ -101,8 +101,6 @@ router.post("/list", async (req, res) => {
 router.post("/onecustomer", async (req, res) => {
 
   const { lastname, token } = req.body
-  console.log({ lastname, token });
-
 
   try {
 
@@ -112,7 +110,7 @@ router.post("/onecustomer", async (req, res) => {
       return { result: false, message: "Utilisateur introuvable pour ce token." };
     }
 
-    const customers = await Customer.findOne({ userId: user._id, firstname: lastname });
+    const customers = await Customer.findOne({ userId: user._id, lastname });
 
     if (customers) {
       res.json({ result: true, customers });

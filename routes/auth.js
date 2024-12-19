@@ -22,6 +22,7 @@ router.post("/signup", async (req, res) => {
       res.json({ result: false, error: "Tous les champs doivent être saisis" });
       return;
     }
+  
 
     const { lastname, firstname, company, email, password } = req.body;
 
