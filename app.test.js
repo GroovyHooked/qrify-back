@@ -29,4 +29,12 @@ describe("POST/auth/signup", () => {
     expect(res.body.email).toBe("nicole@gmail.com"); // Vérifie que toutes les données receptionnées de user sont bien présentent
     expect(res.statusCode).toBe(200); // vérifie que le fichier est bien save en BDD
   });
+  it("teste du Checkbody des champs remplis /signup", async () => {
+    const res = await request(app).post("/auth/signup").send({
+      lastname: "Dupont",
+      firstname: "Nicole",
+    });
+    expect(res.body.result).toBe(false);
+    expect(res.body.error).toBe("Tous les champs doivent être saisis");
+  });
 });
