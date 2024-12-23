@@ -22,7 +22,7 @@ router.post("/signup", async (req, res) => {
       res.json({ result: false, error: "Tous les champs doivent être saisis" });
       return;
     }
-  
+
 
     const { lastname, firstname, company, email, password } = req.body;
 
@@ -50,19 +50,16 @@ router.post("/signup", async (req, res) => {
         token,
         userId,
         avatarPath: "/avatars/avatar1.svg",
+        qrCodeMainColor: '#000000',
+        qrCodeBackgroundColor: '#ffffff'
       });
 
       const savedUser = await newUser.save();
 
-      /* Si l'inscription a bien eu lieu en base de données on renvoie le token sinon envoi d'un message d'erreur */
+      /* Si l'inscription a bien eu lieu en base de données on renvoie true envoi d'un message d'erreur */
       if (savedUser) {
-        res.json({
+        res.status(200).json({
           result: true,
-          token: savedUser.token,
-          email: savedUser.email,
-          firstname: savedUser.firstname,
-          lastname: savedUser.lastname,
-          avatarPath: savedUser.avatarPath,
         });
       } else {
         res.json({
@@ -113,6 +110,8 @@ router.post("/signin", async (req, res, next) => {
       firstname: user.firstname,
       lastname: user.lastname,
       avatarPath: user.avatarPath,
+      qrCodeMainColor: user.qrCodeMainColor,
+      qrCodeBackgroundColor: user.qrCodeBackgroundColor
     });
   } catch (error) {
     res.status(500).json({ error: "La connexion a échoué" });
