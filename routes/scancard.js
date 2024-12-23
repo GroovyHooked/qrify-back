@@ -11,9 +11,9 @@ router.put("/updateValue/:cardId", (req, res) => {
       }
 
       if (data.modifiedCount === 0) {
-        res.json({ result: false, error: "La carte est déjà utilisé" });
+        res.status(500).json({ result: false, error: "La carte est déjà utilisé" });
       } else {
-        res.json({ result: true });
+        res.status(200).json({ result: true });
       }
     });
     

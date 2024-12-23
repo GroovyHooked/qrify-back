@@ -5,7 +5,6 @@ const User = require("../models/users");
 const { checkBody } = require("../modules/checkBody");
 const uid2 = require("uid2");
 const QRCode = require("qrcode");
-const path = require("path");
 const Customer = require("../models/customers");
 const cloudinary = require('cloudinary').v2;
 const fs = require('fs');
@@ -21,23 +20,25 @@ router.post("/newcard", async function (req, res, next) {
       });
     }
 
-    const { totalValue, recipient, message, customerId, merchantMail } =
+    const { totalValue, recipient, message, customerId, merchantMail, color, backgroundColor } =
       req.body;
-
     const cardId = uid2(32);
-
     const date = new Date();
 
     const merchant = await User.findOne({ email: merchantMail });
     console.log({ merchant });
 
+    if (!merchant) {
+      return res.status(500).json({ result: false, error: "L'utiisateur n'existe pas en bdd"})
+    }
+
     const cardPath = `./cards/${cardId}.png`
 
     QRCode.toFile(cardPath, `/displaycard/${cardId}`, {
-      // color: {
-      //   dark: '#d4a373',  // Blue dots
-      //   light: '#bde0fe' // Transparent background
-      // }
+      color: {
+        dark: color,
+        light: backgroundColor
+      }
     }, function (err) {
       if (err) throw err
     })
@@ -63,13 +64,13 @@ router.post("/newcard", async function (req, res, next) {
     const savedCard = await newCard.save();
 
     if (savedCard) {
-      res.json({
+      return res.json({
         result: true,
         card: savedCard,
         url: cloudinaryObj.secure_url
       });
     } else {
-      res.status(500).json({
+      return res.status(500).json({
         result: false,
         error: "La carte n'a pas pu être enregistrée",
       });
@@ -126,7 +127,6 @@ router.get("/download/:cardId", async (req, res) => {
 
 // Envoi des données (enregistrées en bdd) d'un code qr
 router.get("/datacard/:cardId", async (req, res) => {
-  console.log("DEBUG");
 
   try {
     const { cardId } = req.params;
