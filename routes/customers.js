@@ -16,15 +16,12 @@ router.post("/new", async (req, res) => {
     }
 
     const { lastname, firstname, email, phoneNumber, merchantMail } = req.body;
-    console.log({ lastname, firstname, email, phoneNumber });
 
     /* Recherche de l'utilisateur avec l'email utilisé lors de l'inscription */
     const customer = await Customer.findOne({ email });
-    console.log({ customer });
 
     /* Si l'utilisateur existe déjà on le renvoie */
     if (customer) {
-      console.log("if customer");
       res.json({ result: true, customer });
 
     } else {
@@ -40,7 +37,6 @@ router.post("/new", async (req, res) => {
 
         // /* Ajout en base de données */
         const savedCustomer = await newCustomer.save();
-        console.log({ savedCustomer });
 
         /* Si l'inscription du client a bien eu lieu en base de données on renvoie le document fraichement enregistré sinon envoi d'un message d'erreur */
         if (savedCustomer) {
@@ -58,20 +54,6 @@ router.post("/new", async (req, res) => {
     res
       .status(500)
       .json({ error: "Un problème est survenu lors de l'enregistrement" });
-  }
-});
-
-router.get("/list", (req, res) => {
-  try {
-    Customer.find().then((data) => {
-      console.log(data);
-      res.json({ result: true, customers: data });
-    });
-  } catch (error) {
-    res.status(500).json({
-      error:
-        "Un problème est survenu lors la récupération de la liste des clients",
-    });
   }
 });
 
@@ -113,9 +95,9 @@ router.post("/onecustomer", async (req, res) => {
     const customers = await Customer.findOne({ userId: user._id, lastname });
 
     if (customers) {
-      res.json({ result: true, customers });
+      res.status(200).json({ result: true, customers });
     } else {
-      res.json({ result: false, message: "Le client n'existe pas" });
+      res.status(404).json({ result: false, message: "Le client n'existe pas" });
     }
 
   } catch (error) {

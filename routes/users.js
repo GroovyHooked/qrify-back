@@ -1,7 +1,6 @@
 const express = require('express');
 const router = express.Router();
 const User = require("../models/users")
-const path = require('path');
 
 /* GET users listing. */
 router.get('/profile/:email', async (req, res, next) => {
@@ -13,11 +12,11 @@ router.get('/profile/:email', async (req, res, next) => {
 
     if (user) {
 
-      res.json({ result: true, user })
+      res.status(200).json({ result: true, user })
 
     } else {
-      res.json({ result: false, error: 'Utilisateur non trouvé' })
-    }
+      res.status(404).json({ result: false, error: 'Utilisateur non trouvé' })
+    } 
 
   } catch (e) {
 
@@ -43,13 +42,17 @@ router.put('/avatarupdate/', async (req, res) => {
     );
 
     if (!result) {
-      return res.json({ result: false });
+      return res.status(404).json({ result: false, error: "Utilisateur non trouvé en bdd" });
     }
 
-    res.json({ result: true });
+    res.status(200).json({ result: true });
 
   } catch (e) {
     console.log("une erreur est survenue lors de la mise à jour de l'avatar", e);
+    res.status(500).json({
+      result: false,
+      error: "une erreur est survenue lors de la mise à jour de l'avatar",
+    });
   }
 
 })
@@ -66,15 +69,39 @@ router.put('/updateemail', async (req, res) => {
     );
 
     if (!result) {
-      return res.json({ result: false });
+      return res.status(500).json({ result: false, error: "une erreur est survenue en bdd" });
     }
 
     res.json({ result: true });
 
   } catch (e) {
     console.log("une erreur est survenue lors de la mise à jour de l'email", e);
+    res.status(500).json({
+      result: false,
+      error: "une erreur est survenue lors de la mise à jour de l'email",
+    });
   }
 })
 
+router.put('/updatecolors', async (req, res) => {
+
+  const { color, type, token } = req.body
+
+  try {
+
+    await User.findOneAndUpdate(
+      { token: token },
+      type === 'main' ? { qrCodeMainColor: color } : { qrCodeBackgroundColor: color },
+    );
+    res.status(200).json({ result: true })
+
+  } catch (e) {
+    console.log("Une erreur est survenue lors de la mise à jour des couleurs");
+    res.status(500).json({
+      result: false,
+      error: "Une erreur est survenue lors de la mise à jour des couleurs",
+    });
+  }
+})
 
 module.exports = router;
