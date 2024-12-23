@@ -9,6 +9,8 @@ const userSchema = mongoose.Schema({
   token: String,
   logoPath: String,
   avatarPath: String,
+  qrCodeMainColor: String,
+  qrCodeBackgroundColor: String
   // ObjectId
 });
 

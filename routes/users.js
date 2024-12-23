@@ -76,5 +76,25 @@ router.put('/updateemail', async (req, res) => {
   }
 })
 
+router.put('/updatecolors', async (req, res) => {
+
+  const { color, type, token } = req.body
+
+  try {
+
+    await User.findOneAndUpdate(
+      { token: token },
+      type === 'main' ? { qrCodeMainColor: color } : { qrCodeBackgroundColor: color },
+    );
+    res.status(200).json({ result: true })
+
+  } catch (e) {
+    console.log("Une erreur est survenue lors de la mise à jour des couleurs");
+    res.status(500).json({
+      result: false,
+      error: "Une erreur est survenue lors de la mise à jour des couleurs",
+    });
+  }
+})
 
 module.exports = router;
