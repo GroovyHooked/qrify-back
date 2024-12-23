@@ -41,16 +41,15 @@ router.post("/newcard", async function (req, res, next) {
     }, function (err) {
       if (err) throw err
     })
-  
 
-    const resultCloudinary = await cloudinary.uploader.upload(cardPath).catch(err => {
-      res.json({ result: false, error: err });
-    });
+    const { cloudinaryObj, error } = await retryUpload(cardPath, 0)
 
-    fs.unlinkSync(cardPath);
+    if (error) {
+      return res.status(500).json({ error })
+    }
 
     const newCard = new Card({
-      path: resultCloudinary.secure_url,
+      path: cloudinaryObj.secure_url,
       totalValue,
       remainingValue: totalValue,
       date: date,
@@ -67,7 +66,7 @@ router.post("/newcard", async function (req, res, next) {
       res.json({
         result: true,
         card: savedCard,
-        url: resultCloudinary.secure_url
+        url: cloudinaryObj.secure_url
       });
     } else {
       res.status(500).json({
@@ -182,3 +181,20 @@ router.get("/cardData/:cardId", async (req, res) => {
 });
 
 module.exports = router;
+
+
+const retryUpload = async (filePath, counter) => {
+  if (counter >= 10) {
+    return { error: `L’opération d’upload sur Cloudinary a échoué à 10 reprises consécutives.` }
+  }
+
+  const cloudinaryObj = await cloudinary.uploader.upload(filePath);
+
+  if (cloudinaryObj === undefined) {
+    return retryUpload(filePath, counter + 1)
+  }
+
+  fs.unlinkSync(filePath);
+  return { cloudinaryObj }
+
+};
