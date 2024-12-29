@@ -9,6 +9,7 @@ const Customer = require("../models/customers");
 const cloudinary = require('cloudinary').v2;
 const fs = require('fs');
 const path = require('path');
+const os = require('os');
 const BASE_URL = " http://localhost:3001"
 // const BASE_URL = "https://d50e-2a01-cb16-2038-69d8-80fe-8437-bd0d-9383.ngrok-free.app"
 
@@ -32,7 +33,13 @@ router.post("/newcard", async function (req, res, next) {
     if (!merchant) {
       return res.status(500).json({ result: false, error: "L'utiisateur n'existe pas en bdd"})
     }
-    const cardPath = path.join(__dirname, '..', 'cards', `${cardId}.png`);
+
+    // Chemin vers le répertoire temporaire
+    const tempDir = os.tmpdir();
+
+    // Chemin pour le fichier temporaire
+    const cardPath = path.join(tempDir, `${cardId}.png`);
+
 
     // On créé le code qr à l'endroit défini par le chemin fichier en y stockant un chemin d'url (/displaycard/${cardId})
     QRCode.toFile(cardPath, `/displaycard/${cardId}`, {
