@@ -4,13 +4,14 @@ const Card = require("../models/cards");
 const User = require("../models/users");
 const { checkBody } = require("../modules/checkBody");
 const uid2 = require("uid2");
+
 const QRCode = require("qrcode");
 const Customer = require("../models/customers");
-const cloudinary = require('cloudinary').v2;
-const fs = require('fs');
-const path = require('path');
-const os = require('os');
-const BASE_URL = " http://localhost:3001"
+const cloudinary = require("cloudinary").v2;
+const fs = require("fs");
+const path = require("path");
+const os = require("os");
+const BASE_URL = " http://localhost:3001";
 // const BASE_URL = "https://d50e-2a01-cb16-2038-69d8-80fe-8437-bd0d-9383.ngrok-free.app"
 
 router.post("/newcard", async function (req, res, next) {
@@ -22,8 +23,15 @@ router.post("/newcard", async function (req, res, next) {
       });
     }
 
-    const { totalValue, recipient, message, customerId, merchantMail, color, backgroundColor } =
-      req.body;
+    const {
+      totalValue,
+      recipient,
+      message,
+      customerId,
+      merchantMail,
+      color,
+      backgroundColor,
+    } = req.body;
     const cardId = uid2(32);
     const date = new Date();
 
@@ -31,7 +39,9 @@ router.post("/newcard", async function (req, res, next) {
     console.log({ merchant });
 
     if (!merchant) {
-      return res.status(500).json({ result: false, error: "L'utiisateur n'existe pas en bdd"})
+      return res
+        .status(500)
+        .json({ result: false, error: "L'utiisateur n'existe pas en bdd" });
     }
 
     // Chemin vers le répertoire temporaire
@@ -40,21 +50,25 @@ router.post("/newcard", async function (req, res, next) {
     // Chemin pour le fichier temporaire
     const cardPath = path.join(tempDir, `${cardId}.png`);
 
-
     // On créé le code qr à l'endroit défini par le chemin fichier en y stockant un chemin d'url (/displaycard/${cardId})
-    QRCode.toFile(cardPath, `/displaycard/${cardId}`, {
-      color: {
-        dark: color,
-        light: backgroundColor
+    QRCode.toFile(
+      cardPath,
+      `/displaycard/${cardId}`,
+      {
+        color: {
+          dark: color,
+          light: backgroundColor,
+        },
+      },
+      function (err) {
+        if (err) throw err;
       }
-    }, function (err) {
-      if (err) throw err
-    })
+    );
 
-    const { cloudinaryObj, error } = await retryUpload(cardPath, 0)
+    const { cloudinaryObj, error } = await retryUpload(cardPath, 0);
 
     if (error) {
-      return res.status(500).json({ error })
+      return res.status(500).json({ error });
     }
 
     const newCard = new Card({
@@ -75,7 +89,7 @@ router.post("/newcard", async function (req, res, next) {
       return res.json({
         result: true,
         card: savedCard,
-        url: cloudinaryObj.secure_url
+        url: cloudinaryObj.secure_url,
       });
     } else {
       return res.status(500).json({
@@ -93,8 +107,7 @@ router.post("/newcard", async function (req, res, next) {
 });
 
 router.post("/allcards", async (req, res, next) => {
-
-  const { token } = req.body
+  const { token } = req.body;
 
   const user = await User.findOne({ token: token });
 
@@ -120,8 +133,7 @@ router.get("/download/:cardId", async (req, res) => {
         return res.status(404).json({ error: "Carte non trouvée" });
       }
 
-      res.json({ result: true, cardPath: card.path })
-
+      res.json({ result: true, cardPath: card.path });
     } else {
       res.json({ result: false });
     }
@@ -135,7 +147,6 @@ router.get("/download/:cardId", async (req, res) => {
 
 // Envoi des données (enregistrées en bdd) d'un code qr
 router.get("/datacard/:cardId", async (req, res) => {
-
   try {
     const { cardId } = req.params;
 
@@ -190,19 +201,19 @@ router.get("/cardData/:cardId", async (req, res) => {
 
 module.exports = router;
 
-
 const retryUpload = async (filePath, counter) => {
   if (counter >= 10) {
-    return { error: `L’opération d’upload sur Cloudinary a échoué à 10 reprises consécutives.` }
+    return {
+      error: `L’opération d’upload sur Cloudinary a échoué à 10 reprises consécutives.`,
+    };
   }
 
   const cloudinaryObj = await cloudinary.uploader.upload(filePath);
 
   if (cloudinaryObj === undefined) {
-    return retryUpload(filePath, counter + 1)
+    return retryUpload(filePath, counter + 1);
   }
 
   fs.unlinkSync(filePath);
-  return { cloudinaryObj }
-
+  return { cloudinaryObj };
 };
