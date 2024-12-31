@@ -5,7 +5,6 @@ const customerSchema = mongoose.Schema({
   lastname: String,
   email: String,
   phoneNumber: String,
-  // customerId: String,
   userId: String,
 });
 

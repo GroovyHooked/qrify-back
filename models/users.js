@@ -11,7 +11,6 @@ const userSchema = mongoose.Schema({
   avatarPath: String,
   qrCodeMainColor: String,
   qrCodeBackgroundColor: String
-  // ObjectId
 });
 
 const User = mongoose.model("users", userSchema);
