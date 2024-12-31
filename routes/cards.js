@@ -4,13 +4,14 @@ const Card = require("../models/cards");
 const User = require("../models/users");
 const { checkBody } = require("../modules/checkBody");
 const uid2 = require("uid2");
+
 const QRCode = require("qrcode");
 const Customer = require("../models/customers");
-const cloudinary = require('cloudinary').v2;
-const fs = require('fs');
-const path = require('path');
-const os = require('os');
-const BASE_URL = " http://localhost:3001"
+const cloudinary = require("cloudinary").v2;
+const fs = require("fs");
+const path = require("path");
+const os = require("os");
+const BASE_URL = " http://localhost:3001";
 // const BASE_URL = "https://d50e-2a01-cb16-2038-69d8-80fe-8437-bd0d-9383.ngrok-free.app"
 
 router.post("/newcard", async function (req, res, next) {
@@ -22,8 +23,15 @@ router.post("/newcard", async function (req, res, next) {
       });
     }
 
-    const { totalValue, recipient, message, customerId, merchantMail, color, backgroundColor } =
-      req.body;
+    const {
+      totalValue,
+      recipient,
+      message,
+      customerId,
+      merchantMail,
+      color,
+      backgroundColor,
+    } = req.body;
     const cardId = uid2(32);
     const date = new Date();
 
@@ -54,7 +62,7 @@ router.post("/newcard", async function (req, res, next) {
     const { cloudinaryObj, error } = await retryUpload(cardPath)
 
     if (error) {
-      return res.status(500).json({ error })
+      return res.status(500).json({ error });
     }
     // Préparation de l'enregistrement de la nouvelle carte en bdd
     const newCard = new Card({
@@ -77,7 +85,7 @@ router.post("/newcard", async function (req, res, next) {
       return res.status(200).json({
         result: true,
         card: savedCard,
-        url: cloudinaryObj.secure_url
+        url: cloudinaryObj.secure_url,
       });
     } else {
       // Sinon on retourne un message d'erreur
@@ -154,7 +162,6 @@ router.get("/download/:cardId", async (req, res) => {
 
 // Renvoi des données d'un code qr (carte + client)
 router.get("/datacard/:cardId", async (req, res) => {
-
   try {
     const { cardId } = req.params;
 
@@ -218,16 +225,17 @@ module.exports = router;
 
 const retryUpload = async (filePath, counter = 0) => {
   if (counter >= 10) {
-    return { error: `L’opération d’upload sur Cloudinary a échoué à 10 reprises consécutives.` }
+    return {
+      error: `L’opération d’upload sur Cloudinary a échoué à 10 reprises consécutives.`,
+    };
   }
 
   const cloudinaryObj = await cloudinary.uploader.upload(filePath);
 
   if (cloudinaryObj === undefined) {
-    return retryUpload(filePath, counter + 1)
+    return retryUpload(filePath, counter + 1);
   }
 
   fs.unlinkSync(filePath);
-  return { cloudinaryObj }
-
+  return { cloudinaryObj };
 };
