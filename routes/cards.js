@@ -146,18 +146,17 @@ router.get("/download/:cardId", async (req, res) => {
 });
 
 // Envoi des données (enregistrées en bdd) d'un code qr
-router.get("/datacard/:cardId", async (req, res) => {
+router.get("/cardData/:cardId", async (req, res) => {
   try {
     const { cardId } = req.params;
 
-    const cardData = await Card.findOne({ cardId });
+    const cardData = await Card.findOne({ _id: cardId });
 
     if (!cardData) {
       return res.status(404).json({ error: "Carte non trouvée" });
     }
 
     const customerId = cardData.customerId;
-
     const customer = await Customer.findOne({ _id: customerId });
 
     if (!customer) {
@@ -174,28 +173,6 @@ router.get("/datacard/:cardId", async (req, res) => {
       error:
         "Une erreur est survenue lors de la récupération des données de la carte",
     });
-  }
-});
-
-router.get("/cardData/:cardId", async (req, res) => {
-  try {
-    console.log("Dans la route");
-
-    const { cardId } = req.params;
-
-    const dataCard = await Card.findOne({ _id: cardId });
-
-    if (dataCard) {
-      const { customerId } = dataCard;
-      const customer = await Customer.findOne({ _id: customerId });
-      console.log({ dataCard, customer });
-
-      res.json({ result: true, dataCard, customer });
-    } else {
-      res.json({ result: false });
-    }
-  } catch (error) {
-    console.log(error);
   }
 });
 
