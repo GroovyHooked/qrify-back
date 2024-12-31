@@ -19,7 +19,7 @@ router.post("/signup", async (req, res) => {
         "password",
       ])
     ) {
-      res.json({ result: false, error: "Tous les champs doivent être saisis" });
+      res.status(400).json({ result: false, error: "Tous les champs doivent être saisis" });
       return;
     }
 
@@ -31,7 +31,7 @@ router.post("/signup", async (req, res) => {
 
     /* Si l'utilisateur existe déjà */
     if (user) {
-      res.json({
+      res.status(400).json({
         result: false,
         error: "L'utilisateur existe déjà en base de données",
       });
@@ -62,7 +62,7 @@ router.post("/signup", async (req, res) => {
           result: true,
         });
       } else {
-        res.json({
+        res.status(500).json({
           result: false,
           error:
             "Un problème est survenu lors de l'enregistrement en base de données",
@@ -81,7 +81,7 @@ router.post("/signin", async (req, res, next) => {
   try {
     /* Verification des champs */
     if (!checkBody(req.body, ["email", "password"])) {
-      res.json({ result: false, error: "Tous les champs doivent être saisis" });
+      res.status(400).json({ result: false, error: "Tous les champs doivent être saisis" });
       return;
     }
 
@@ -92,18 +92,18 @@ router.post("/signin", async (req, res, next) => {
 
     /* Si l'utilisateur n'existe pas */
     if (!user) {
-      res.json({ result: false, error: "Vous n'êtes pas inscrit" });
+      res.status(404).json({ result: false, error: "Vous n'êtes pas inscrit" });
       return;
     }
 
     /* Si l'utilisateur existe mais mot de passe incorrect */
     if (user && !bcrypt.compareSync(password, user.password)) {
-      res.json({ result: false, error: "Le mot de passe est inccorect" });
+      res.status(400).json({ result: false, error: "Le mot de passe est inccorect" });
       return;
     }
 
     /* Si l'utilisateur existe et le mot de passe est correct */
-    res.json({
+    res.status(200).json({
       result: true,
       token: user.token,
       email: user.email,

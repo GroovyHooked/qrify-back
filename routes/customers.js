@@ -11,7 +11,7 @@ router.post("/new", async (req, res) => {
     if (
       !checkBody(req.body, ["firstname", "lastname", "email", "phoneNumber"])
     ) {
-      res.json({ result: false, error: "Tous les champs doivent être saisis" });
+      res.status(400).json({ result: false, error: "Tous les champs doivent être saisis" });
       return;
     }
 
@@ -22,7 +22,7 @@ router.post("/new", async (req, res) => {
 
     /* Si l'utilisateur existe déjà on le renvoie */
     if (customer) {
-      res.json({ result: true, customer });
+      res.status(200).json({ result: true, customer });
 
     } else {
       // récupérer l'objectId du commercant sur la back-end
@@ -40,9 +40,9 @@ router.post("/new", async (req, res) => {
 
         /* Si l'inscription du client a bien eu lieu en base de données on renvoie le document fraichement enregistré sinon envoi d'un message d'erreur */
         if (savedCustomer) {
-          res.json({ result: true, customer: savedCustomer });
+          res.status(200).json({ result: true, customer: savedCustomer });
         } else {
-          res.json({
+          res.status(500).json({
             result: false,
             error:
               "Un problème est survenu lors de l'enregistrement en base de données",
@@ -65,12 +65,12 @@ router.post("/list", async (req, res) => {
     const user = await User.findOne({ token: token });
 
     if (!user) {
-      return { result: false, message: "Utilisateur introuvable pour ce token." };
+      return res.status(404).json({result: false, message: "Utilisateur introuvable pour ce token." })
     }
 
     const customers = await Customer.find({ userId: user._id });
 
-    res.json({ result: true, customers });
+    res.status(200).json({ result: true, customers });
 
   } catch (error) {
     res.status(500).json({

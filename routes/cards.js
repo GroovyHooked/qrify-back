@@ -27,11 +27,12 @@ router.post("/newcard", async function (req, res, next) {
     const cardId = uid2(32);
     const date = new Date();
 
+    // On récupère le commerçant en base de données
     const merchant = await User.findOne({ email: merchantMail });
-    console.log({ merchant });
 
+    // Si aucun commerçant n'est trouvé on renvoie une erreur
     if (!merchant) {
-      return res.status(500).json({ result: false, error: "L'utiisateur n'existe pas en bdd"})
+      return res.status(500).json({ result: false, error: "L'utiisateur n'existe pas en bdd" })
     }
 
     // Chemin vers le répertoire temporaire
@@ -39,7 +40,6 @@ router.post("/newcard", async function (req, res, next) {
 
     // Chemin pour le fichier temporaire
     const cardPath = path.join(tempDir, `${cardId}.png`);
-
 
     // On créé le code qr à l'endroit défini par le chemin fichier en y stockant un chemin d'url (/displaycard/${cardId})
     QRCode.toFile(cardPath, `/displaycard/${cardId}`, {
@@ -50,13 +50,13 @@ router.post("/newcard", async function (req, res, next) {
     }, function (err) {
       if (err) throw err
     })
-
-    const { cloudinaryObj, error } = await retryUpload(cardPath, 0)
+    // Upload du fichier code QR sur Cloudinary
+    const { cloudinaryObj, error } = await retryUpload(cardPath)
 
     if (error) {
       return res.status(500).json({ error })
     }
-
+    // Préparation de l'enregistrement de la nouvelle carte en bdd
     const newCard = new Card({
       path: cloudinaryObj.secure_url,
       totalValue,
@@ -69,15 +69,18 @@ router.post("/newcard", async function (req, res, next) {
       userId: merchant._id,
     });
 
+    // Enregistrement de la nouvelle carte en base de données 
     const savedCard = await newCard.save();
 
+    // Si la carte a correctement été enregistrée en bdd on renvoie les données enregistrées ainsi que l'url Cloudinary du code QR
     if (savedCard) {
-      return res.json({
+      return res.status(200).json({
         result: true,
         card: savedCard,
         url: cloudinaryObj.secure_url
       });
     } else {
+      // Sinon on retourne un message d'erreur
       return res.status(500).json({
         result: false,
         error: "La carte n'a pas pu être enregistrée",
@@ -94,21 +97,37 @@ router.post("/newcard", async function (req, res, next) {
 
 router.post("/allcards", async (req, res, next) => {
 
-  const { token } = req.body
+  try {
 
-  const user = await User.findOne({ token: token });
+    const { token } = req.body
 
-  const cards = await Card.find({ userId: user._id })
-    .populate({
-      path: "customerId", // Champ référencé dans Card
-      model: "customers", // Modèle Mongoose associé
-    })
-    .exec();
+    if (token) {
+      // On récupère les données du commerçant
+      const user = await User.findOne({ token: token });
 
-  res.json({ result: true, cards });
+      // On récupère toutes les cartes et les données client liée à chaque carte 
+      const cards = await Card.find({ userId: user._id })
+        .populate({
+          path: "customerId", // Champ référencé dans la collection Card
+          model: "customers", // Modèle Mongoose associé
+        })
+        .exec();
+
+      res.status(200).json({ result: true, cards });
+
+    } else {
+      res.status(401).json({ result: false });
+    }
+
+  } catch (e) {
+
+    res.status(500).json({ result: false, error: e });
+
+  }
+
 });
 
-// Envoi d'un code QR au front sous forme de fichier
+// Envoi d'un code QR au front sous forme d'uri
 router.get("/download/:cardId", async (req, res) => {
   try {
     const { cardId } = req.params;
@@ -120,10 +139,10 @@ router.get("/download/:cardId", async (req, res) => {
         return res.status(404).json({ error: "Carte non trouvée" });
       }
 
-      res.json({ result: true, cardPath: card.path })
+      res.status(200).json({ result: true, cardPath: card.path })
 
     } else {
-      res.json({ result: false });
+      res.status(400).json({ result: false });
     }
   } catch (error) {
     console.error("Erreur lors de la récupération de la carte :", error);
@@ -133,7 +152,7 @@ router.get("/download/:cardId", async (req, res) => {
   }
 });
 
-// Envoi des données (enregistrées en bdd) d'un code qr
+// Renvoi des données d'un code qr (carte + client)
 router.get("/datacard/:cardId", async (req, res) => {
 
   try {
@@ -153,7 +172,8 @@ router.get("/datacard/:cardId", async (req, res) => {
       return res.status(404).json({ error: "Client non trouvé" });
     }
 
-    res.json({ cardData, customer });
+    res.status(200).json({ cardData, customer });
+
   } catch (error) {
     console.error(
       "Erreur lors de la récupération des données de la carte :",
@@ -168,30 +188,35 @@ router.get("/datacard/:cardId", async (req, res) => {
 
 router.get("/cardData/:cardId", async (req, res) => {
   try {
-    console.log("Dans la route");
 
     const { cardId } = req.params;
 
     const dataCard = await Card.findOne({ _id: cardId });
 
     if (dataCard) {
-      const { customerId } = dataCard;
-      const customer = await Customer.findOne({ _id: customerId });
-      console.log({ dataCard, customer });
 
-      res.json({ result: true, dataCard, customer });
+      const { customerId } = dataCard;
+
+      const customer = await Customer.findOne({ _id: customerId });
+
+      res.status(200).json({ result: true, dataCard, customer });
+
     } else {
-      res.json({ result: false });
+
+      res.status(404).json({ result: false });
+
     }
   } catch (error) {
     console.log(error);
+    res.status(500).json({ result: false });
   }
 });
+
 
 module.exports = router;
 
 
-const retryUpload = async (filePath, counter) => {
+const retryUpload = async (filePath, counter = 0) => {
   if (counter >= 10) {
     return { error: `L’opération d’upload sur Cloudinary a échoué à 10 reprises consécutives.` }
   }

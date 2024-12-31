@@ -30,7 +30,7 @@ router.get('/profile/:email', async (req, res, next) => {
 
 });
 
-router.put('/avatarupdate/', async (req, res) => {
+router.put('/avatarupdate', async (req, res) => {
 
   const { avatarPath, token } = req.body
 
@@ -38,7 +38,6 @@ router.put('/avatarupdate/', async (req, res) => {
     const result = await User.findOneAndUpdate(
       { token: token },
       { avatarPath: avatarPath },
-      { new: true }
     );
 
     if (!result) {
@@ -65,14 +64,13 @@ router.put('/updateemail', async (req, res) => {
     const result = await User.findOneAndUpdate(
       { token: token },
       { email },
-      { new: true }
     );
 
     if (!result) {
       return res.status(500).json({ result: false, error: "une erreur est survenue en bdd" });
     }
 
-    res.json({ result: true });
+    res.status(200).json({ result: true });
 
   } catch (e) {
     console.log("une erreur est survenue lors de la mise à jour de l'email", e);
