@@ -4,6 +4,7 @@ const User = require("../models/users")
 
 /* GET users listing. */
 router.get('/profile/:email', async (req, res, next) => {
+
   const { email } = req.params
 
   try {
@@ -15,8 +16,10 @@ router.get('/profile/:email', async (req, res, next) => {
       res.status(200).json({ result: true, user })
 
     } else {
+
       res.status(404).json({ result: false, error: 'Utilisateur non trouvé' })
-    } 
+
+    }
 
   } catch (e) {
 
@@ -35,12 +38,12 @@ router.put('/avatarupdate', async (req, res) => {
   const { avatarPath, token } = req.body
 
   try {
-    const result = await User.findOneAndUpdate(
+    const updateResult = await User.findOneAndUpdate(
       { token: token },
-      { avatarPath: avatarPath },
+      { avatarPath: avatarPath }
     );
 
-    if (!result) {
+    if (!updateResult) {
       return res.status(404).json({ result: false, error: "Utilisateur non trouvé en bdd" });
     }
 
@@ -56,8 +59,8 @@ router.put('/avatarupdate', async (req, res) => {
 
 })
 
-
 router.put('/updateemail', async (req, res) => {
+
   const { email, token } = req.body
 
   try {
@@ -89,6 +92,8 @@ router.put('/updatecolors', async (req, res) => {
 
     await User.findOneAndUpdate(
       { token: token },
+      // Si le type est égal à "main" on met à jour la couleur principale, sinon on met à jour la couleur de fond
+      // (condition ternaire)
       type === 'main' ? { qrCodeMainColor: color } : { qrCodeBackgroundColor: color },
     );
     res.status(200).json({ result: true })
